@@ -4,4 +4,7 @@ import "./registerServiceWorker";
 import router from "./router";
 import store from "./store";
 
+import "normalize.css";
+import "@/assets/style/main.scss";
+
 createApp(App).use(store).use(router).mount("#app");

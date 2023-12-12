@@ -1,0 +1,71 @@
+@import "./variables.scss";
+
+body {
+  color: var(--black);
+
+  font-family: Cera Pro;
+  font-size: var(--font-size);
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  color: var(--black);
+  background-color: var(--white);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+}
+
+input {
+  border: none;
+  &:focus {
+    outline: none;
+  }
+}
+
+button {
+  font-family: Cera Pro;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  border: none;
+}
+
+button:focus,
+button:active,
+a:focus,
+a:active {
+  outline: none;
+  background-color: transparent;
+}
+
+.h1 {
+  font-size: 40px;
+  font-weight: 500;
+}
+
+.h2 {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.text-small {
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 28px;
+}
+
+.text-small-bold {
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 28px;
+}
