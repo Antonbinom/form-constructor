@@ -1,0 +1,110 @@
+<template lang="pug">
+.forms-list(:style="{height: formsListHeight + 'px'}")
+  .forms-list__item(
+    v-for="(from, index) in forms"
+    :key="index"
+    )
+    .forms-list__item-info
+      h2.h2.forms-list__item-title {{ from.title }}
+      span.forms-list__item-author Автор: {{ from.author }}
+      span.forms-list__item-date Дата создания: {{ from.created }}
+    .forms-list__item-buttons
+      Button(
+        @action="editForm"
+        name="Редактировать"
+        type="secondary"
+        )
+      Button(
+        name="Удалить"
+        type="borderless"
+        @action="removeForm(index)"
+        )
+</template>
+
+// <script setup>
+import { ref, onMounted, onUnmounted, computed } from "vue";
+import Button from "@/components/ButtonComponent.vue";
+
+const forms = ref([
+  {
+    title: 'Форма регистрации участников',
+    author: 'user1',
+    created: '01.01.23'
+  },
+  {
+    title: 'Форма регистрации участников1',
+    author: 'user2',
+    created: '02.01.23'
+  },
+  {
+    title: 'Форма регистрации участников2',
+    author: 'user3',
+    created: '03.01.23'
+  },
+  {
+    title: 'Форма регистрации участников3',
+    author: 'user4',
+    created: '04.01.23'
+  },
+])
+
+const formsListHeight = ref('')
+
+const removeForm = (index) => {
+  forms.value.splice(index, 1)
+}
+const handleResize = () => {
+  const windowHeight = window.innerHeight;
+  formsListHeight.value = windowHeight - 270;
+}
+
+onMounted(() => {
+window.addEventListener('resize', handleResize);
+})
+
+onUnmounted(() => {
+window.removeEventListener('resize', handleResize);
+})
+handleResize()
+</script>
+
+<style lang="scss">
+.forms {
+  &-list {
+    overflow-y: scroll;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    &__item {
+      display: flex;
+      justify-content: space-between;
+      padding: 24px;
+      margin-bottom: 30px;
+      background-color: var(--white);
+      border-radius: var(--radius);
+      &-info {
+        display: flex;
+        flex-direction: column;
+      }
+      &-title {
+        margin-bottom: 8px;
+      }
+      &-author {
+        margin-bottom: 58px;
+        font-size: 14px;
+        color: var(--text)
+      }
+      &-date {
+        font-size: 14px;
+        color: var(--text)
+      }
+      &-buttons {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+    }
+  }
+}
+</style>

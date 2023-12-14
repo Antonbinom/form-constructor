@@ -5,6 +5,7 @@ input.input(
   :maxlength="maxInputLength"
   :type="getInputType"
   :placeholder="placeholder"
+  :required="isRequired"
     )
 </template>
 
@@ -22,6 +23,10 @@ const props = defineProps({
       inputType: {
         type: String,
         default: "text",
+      },
+       isRequired: {
+        type: Boolean,
+        default: false,
       },
 });
 
