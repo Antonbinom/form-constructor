@@ -24,7 +24,7 @@ const routes = [
   },
   {
     path: '/form-constructor/:id',
-    name: 'form constructor',
+    name: 'edit form',
     component: () => import("../views/FormConstructorView.vue")
   }
 ];
