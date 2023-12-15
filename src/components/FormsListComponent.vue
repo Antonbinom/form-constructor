@@ -1,5 +1,6 @@
 <template lang="pug">
 .forms-list(:style="{height: formsListHeight + 'px'}")
+  h2.h2(v-if="!getForms.length") Создайте форму и она появится здесь
   .forms-list__item(
     v-for="(form, index) in getForms"
     :key="index"
