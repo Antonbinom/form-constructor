@@ -15,12 +15,14 @@
       Button.forms-side__btn(
         name="Скрипт"
         type="secondary"
+        )
+      Button.forms-side__btn(
+        name="Сохранить"
+        type="primary"
         @action="saveForm"
         )
-      Button.forms-side__btn(name="Сохранить" type="primary")
   .constructor
     .constructor-header
-      pre {{ form }}
       h1.h1 Поля
     .constructor-hidden__fields
       h2.constructor-title.h2 Скрытые поля
@@ -42,7 +44,7 @@
           :input-value="field.value"
           placeholder="Название для поля"
           type="text"
-          @updateInput="form.fields[index].value = $event"
+          @updateInput="form.fields[index].placeholder = $event"
         )
         .constructor-fields__required
           Checkbox(
@@ -61,7 +63,7 @@
         :key="checkbox.id"
         )
         .constructor-fields-header
-          span {{ 'Секбокс' }}
+          span {{ 'Чекбокс' }}
           Button(
             name="Удалить чекбокс"
             type="borderless"
@@ -78,18 +80,57 @@
             :isChecked="checkbox.required"
             @checkbox-change="checkbox.required = !checkbox.required"
             )
-          span Сделать чекболкс обязательным
+          span Сделать чекбокс обязательным
     BigBtn(
       @action="addCheckbox"
       name="Добавить чекбокс"
       )
-    .constructor-footer
-
-      BigBtn(
-        @action="addList"
-        name="Добавить список"
+    .constructor-selects
+      h2.constructor-title.h2 Списки
+      .constructor-fields__item(
+        v-for="(select, index) in form.selects"
+        :key="select.id"
         )
-
+        .constructor-fields-header
+          span {{ 'Список' }}
+          Button(
+            name="Удалить список"
+            type="borderless"
+            @action="removeField('selects', select.id)"
+            )
+        Input.constructor-fields__input(
+          :input-value="select.name"
+          placeholder="Название списка"
+          type="text"
+          @updateInput="select.name = $event"
+        )
+        .constructor-select__option(v-for="option in select.options")
+          Input.constructor-select__option-input(
+            :input-value="option.name"
+            placeholder="Введите название элемента списка"
+            type="text"
+            @updateInput="option.name = $event"
+          )
+          Button.constructor-select__option-delete(
+            v-if="!option.hidden"
+            name="Удалить пункт"
+            type="borderless"
+            @action="removeOption(index, option.id)"
+          )
+        BigBtn(
+        @action="addOption(index)"
+        name="Добавить пункт"
+        )
+        .constructor-fields__required
+          Checkbox(
+            :isChecked="select.required"
+            @checkbox-change="select.required = !select.required"
+            )
+          span Сделать список обязательным
+    BigBtn(
+      @action="addSelect"
+      name="Добавить список"
+      )
 
   .preview
     .preview-wrapper
@@ -99,10 +140,9 @@
           v-for="(input, index) in form.fields"
           key="index"
           :input-value="input.value"
-          :placeholder="input.placeholder"
+          :placeholder="input.value || input.placeholder"
           :type="input.type"
           :isRequired="input.required"
-          @updateInput="form.fields[index].value = $event"
           )
       .preview-checkboxes(v-if="form.checkboxes?.length")
         .preview-checkboxes__item(
@@ -114,6 +154,12 @@
             @checkbox-change="checkbox.isChecked = !checkbox.isChecked"
             )
           p {{ checkbox.text }}
+      .preview-selects(v-if="form.selects?.length")
+        Select(
+          v-for="(select, index) in form.selects"
+          :data="select"
+
+          )
       Button.preview-btn(
         name="Отправить"
         )
@@ -127,7 +173,13 @@ import BigBtn from "@/components/BigBtnComponent.vue";
 import FormsList from "@/components/FormsListComponent.vue";
 import Input from "@/components/InputComponent.vue";
 import Checkbox from "@/components/CheckboxComponent.vue";
+import Select from "@/components/SelectComponent.vue";
+
+
+// Methods
 import generateUniqueId from '@/methods/generateUniqueId.js'
+
+// Store
 import { useStore } from "vuex";
 //
 const store = useStore();
@@ -155,8 +207,23 @@ const addField = () => {
   form.value.fields.push(newField)
 }
 
-const addList = () => {
-
+const addSelect = () => {
+  const id = generateUniqueId('sct')
+  const newSelect = {
+    id,
+    name: 'Новый список',
+    options: [
+      {
+        value: '',
+        name: 'Выберите значение',
+        selected: true,
+        disabled: true,
+        hidden: true
+      },
+    ],
+    required: false
+  };
+  form.value.selects.push(newSelect)
 }
 
 const addCheckbox = () => {
@@ -171,13 +238,33 @@ const addCheckbox = () => {
   form.value.checkboxes.push(newCheckbox)
 }
 
+const addOption = (index) => {
+  const id = generateUniqueId('op');
+  const newOption =
+    {
+    id,
+    value: "",
+    name: "",
+    selected: false,
+  }
+  form.value.selects[index].options.push(newOption)
+}
+
+
 const removeField = (type, id) => {
   form.value[type] = form.value[type].filter(field => field.id !== id)
 }
 
+const removeOption = (index, id) => {
+  form.value.selects[index].options = form.value.selects[0].options.filter(option => option?.id !== id)
+}
+
 const saveForm = () => {
-  if(!form.value.fields.length) return
-  store.dispatch('setCurrentForm', form)
+  const {fields, checkboxes, selects} = form.value
+  if(fields.length || checkboxes.length || selects.length) {
+    store.dispatch('addNewForm', form.value)
+  }
+  return
 }
 
 const switchMenu = (index) => {
@@ -191,8 +278,11 @@ onMounted(() => {
   form.value = {
   id: generateUniqueId('fm'),
   name: 'Форма регистрации участников',
+  author: localStorage.getItem('user'),
+  created: new Date().toLocaleDateString('en-GB'),
   fields: [],
-  checkboxes: []
+  checkboxes: [],
+  selects: []
 }
 })
 </script>
@@ -256,13 +346,15 @@ onMounted(() => {
         min-width: fit-content;
       }
     }
-    &__input.input {
-      box-sizing: border-box;
-      width: 100%;
-      max-width: none;
-      margin-bottom: 10px;
-      color: var(--black);
-      background-color: var(--white)
+    &__input {
+      &.input {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: none;
+        margin-bottom: 10px;
+        color: var(--black);
+        background-color: var(--white)
+      }
     }
     &__required {
       display: flex;
@@ -275,6 +367,33 @@ onMounted(() => {
   & .big-btn {
       margin-bottom: 30px;
       width: 100%;
+  }
+  &-selects {
+    & .constructor-fields__input {
+      margin-bottom: 20px;
+    }
+    .constructor-fields__required {
+      margin-top: 20px;
+    }
+  }
+  &-select {
+    &__option {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      &-input {
+        max-width: none;
+        flex-grow: 1;
+        padding: 10px 30px;
+        background-color: var(--white);
+        color: var(--black)
+      }
+      &-delete {
+        margin-left: 15px;
+        min-width: fit-content;
+      }
+    }
   }
 }
 

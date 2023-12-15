@@ -1,13 +1,13 @@
 <template lang="pug">
 .forms-list(:style="{height: formsListHeight + 'px'}")
   .forms-list__item(
-    v-for="(from, index) in forms"
+    v-for="(form, index) in getForms"
     :key="index"
     )
     .forms-list__item-info
-      h2.h2.forms-list__item-title {{ from.title }}
-      span.forms-list__item-author Автор: {{ from.author }}
-      span.forms-list__item-date Дата создания: {{ from.created }}
+      h2.h2.forms-list__item-title {{ form.name }}
+      span.forms-list__item-author Автор: {{ form.author }}
+      span.forms-list__item-date Дата создания: {{ form.created }}
     .forms-list__item-buttons
       Button(
         @action="editForm"
@@ -17,41 +17,25 @@
       Button(
         name="Удалить"
         type="borderless"
-        @action="removeForm(index)"
+        @action="removeForm(form.id)"
         )
 </template>
 
 // <script setup>
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import Button from "@/components/ButtonComponent.vue";
+import { useStore } from "vuex";
 
-const forms = ref([
-  {
-    title: 'Форма регистрации участников',
-    author: 'user1',
-    created: '01.01.23'
-  },
-  {
-    title: 'Форма регистрации участников1',
-    author: 'user2',
-    created: '02.01.23'
-  },
-  {
-    title: 'Форма регистрации участников2',
-    author: 'user3',
-    created: '03.01.23'
-  },
-  {
-    title: 'Форма регистрации участников3',
-    author: 'user4',
-    created: '04.01.23'
-  },
-])
+const store = useStore();
 
 const formsListHeight = ref('')
 
-const removeForm = (index) => {
-  forms.value.splice(index, 1)
+const getForms = computed(()=> {
+  return store.getters.getForms
+})
+
+const removeForm = (id) => {
+  store.dispatch('deleteForm', id)
 }
 const handleResize = () => {
   const windowHeight = window.innerHeight;

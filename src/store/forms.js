@@ -1,32 +1,36 @@
-const form = {
+const forms = {
   state: {
     forms: [],
-    currentForm: {}
   },
   mutations: {
-    setForms(state, formData) {
-      state.forms = state.forms.push(formData);
+    setForms(state, data) {
+      state.forms = data;
     },
-    setCurrentForm(state, data) {
-      state.currentForm = data;
+    addNewForm(state, formData) {
+      state.forms.push(formData);
+      localStorage.setItem('forms', JSON.stringify(state.forms))
+    },
+    deleteForm(state, id) {
+      state.forms = state.forms.filter(form => form.id !== id)
+      localStorage.setItem('forms', JSON.stringify(state.forms))
     }
   },
   actions: {
-    setForms({commit}, formData) {
-      commit('setForms', formData)
+    setForms({commit}, data) {
+      commit('setForms', data)
     },
-    setCurrentForm({commit}, data) {
-      commit('setCurrentForm', data)
+    addNewForm({commit}, formData) {
+      commit('addNewForm', formData)
+    },
+    deleteForm({commit}, id) {
+      commit('deleteForm', id)
     }
   },
   getters: {
     getForms(state) {
       return state.forms;
     },
-    getCurrentForm(state) {
-      return state.currentForm;
-    }
   }
 }
 
-export default form;
+export default forms;
