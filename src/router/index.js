@@ -13,9 +13,19 @@ const routes = [
     component: () => import("../views/FormsView.vue")
   },
   {
-    path: '/create-form',
-    name: 'create form',
-    component: () => import("../views/CreateFormView.vue")
+    path: "/forms/:id",
+    name: "form-preview",
+    component: () => import("../views/FormPreviewPage.vue")
+  },
+  {
+    path: '/form-constructor',
+    name: 'form constructor',
+    component: () => import("../views/FormConstructorView.vue")
+  },
+  {
+    path: '/form-constructor/:id',
+    name: 'form constructor',
+    component: () => import("../views/FormConstructorView.vue")
   }
 ];
 

@@ -24,7 +24,7 @@
   .constructor
     .constructor-header
       h1.h1 Поля
-    .constructor-hidden__fields
+    .constructor-fields
       h2.constructor-title.h2 Скрытые поля
       BigBtn(name="Добавить поле")
     .constructor-fields
@@ -144,6 +144,12 @@
           :type="input.type"
           :isRequired="input.required"
           )
+      .preview-selects(v-if="form.selects?.length")
+        Select(
+          v-for="(select, index) in form.selects"
+          :data="select"
+
+          )
       .preview-checkboxes(v-if="form.checkboxes?.length")
         .preview-checkboxes__item(
           v-for="checkbox in form.checkboxes"
@@ -154,27 +160,20 @@
             @checkbox-change="checkbox.isChecked = !checkbox.isChecked"
             )
           p {{ checkbox.text }}
-      .preview-selects(v-if="form.selects?.length")
-        Select(
-          v-for="(select, index) in form.selects"
-          :data="select"
-
-          )
       Button.preview-btn(
         name="Отправить"
         )
 </template>
 
 // <script setup>
-import { ref, onMounted, onUnmounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import Sidebar from "@/components/layouts/SidebarComponent.vue";
 import Button from "@/components/ButtonComponent.vue";
 import BigBtn from "@/components/BigBtnComponent.vue";
-import FormsList from "@/components/FormsListComponent.vue";
 import Input from "@/components/InputComponent.vue";
 import Checkbox from "@/components/CheckboxComponent.vue";
 import Select from "@/components/SelectComponent.vue";
-
+import { useRoute } from "vue-router";
 
 // Methods
 import generateUniqueId from '@/methods/generateUniqueId.js'
@@ -183,7 +182,7 @@ import generateUniqueId from '@/methods/generateUniqueId.js'
 import { useStore } from "vuex";
 //
 const store = useStore();
-
+const route = useRoute()
 const menuItems = ref([
   { name: "Тип формы", isActive: false },
   { name: "Сущности",  isActive: false },
@@ -198,7 +197,6 @@ const addField = () => {
   const id = generateUniqueId('fd')
   const newField = {
     id,
-    name: "",
     value: "",
     placeholder: 'Название для поля',
     type: 'text',
@@ -275,15 +273,20 @@ const switchMenu = (index) => {
 }
 
 onMounted(() => {
-  form.value = {
-  id: generateUniqueId('fm'),
-  name: 'Форма регистрации участников',
-  author: localStorage.getItem('user'),
-  created: new Date().toLocaleDateString('en-GB'),
-  fields: [],
-  checkboxes: [],
-  selects: []
-}
+  if(route.params.id) {
+    store.dispatch('setCurrentFormId', route.params.id)
+    form.value = store.getters.getCurrentForm
+  } else {
+    form.value = {
+    id: generateUniqueId('fm'),
+    name: 'Форма регистрации участников',
+    author: localStorage.getItem('user'),
+    created: new Date().toLocaleDateString('en-EN').replace(/\//g,'.'),
+    fields: [],
+    checkboxes: [],
+    selects: []
+  }
+  }
 })
 </script>
 
@@ -420,9 +423,15 @@ onMounted(() => {
       margin-bottom: 10px;
     }
   }
+  &-selects {
+    & .select {
+      margin-bottom: 6px;
+    }
+  }
   &-checkboxes {
     &__item {
       display: flex;
+      margin-bottom: 6px;
 
       & .checkbox {
         margin-right: 16px;

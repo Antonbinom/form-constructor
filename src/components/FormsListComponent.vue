@@ -10,9 +10,14 @@
       span.forms-list__item-date Дата создания: {{ form.created }}
     .forms-list__item-buttons
       Button(
-        @action="editForm"
+        @action="$router.push(`form-constructor/${form.id}`)"
         name="Редактировать"
         type="secondary"
+        )
+      Button(
+        name="Перейти на страницу с формой"
+        type="borderless"
+        @action="$router.push(`/forms/${form.id}`)"
         )
       Button(
         name="Удалить"
