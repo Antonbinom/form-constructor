@@ -1,0 +1,15 @@
+@font-face {
+	font-family: "Cera Pro";
+	src: url("./CeraPro-Regular.woff2") format("woff2"), url("./CeraPro-Regular.woff") format("woff"),
+		url("./CeraPro-Regular.ttf") format("truetype"), url("./CeraPro-Regular.eot") format("embedded-opentype");
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "Cera Pro";
+	src: url("./CeraPro-Medium.woff2") format("woff2"), url("./CeraPro-Medium.woff") format("woff"),
+		url("./CeraPro-Medium.ttf") format("truetype"), url("./CeraPro-Medium.eot") format("embedded-opentype");
+	font-weight: 500;
+	font-style: normal;
+}
