@@ -3,7 +3,10 @@ button.big-btn(
   @click='click'
   )
   span.big-btn__text {{ name }}
-  img(src="@/assets/img/plus.svg")
+  img(
+    v-if="icon"
+    src="@/assets/img/plus.svg"
+    )
 </template>
 
 <script setup>
@@ -12,6 +15,10 @@ const props = defineProps({
     type: String,
     required: true
   },
+  icon: {
+    type: Boolean,
+    default: true
+  }
 })
 const emit = defineEmits(['action']);
 

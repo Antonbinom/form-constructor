@@ -14,17 +14,17 @@ const routes = [
   },
   {
     path: "/forms/:id",
-    name: "form-preview",
-    component: () => import("../views/FormPreviewPage.vue")
+    name: "preview",
+    component: () => import("../views/FormPreviewView.vue")
   },
   {
-    path: '/form-constructor',
-    name: 'form constructor',
+    path: '/forms/constructor',
+    name: 'constructor',
     component: () => import("../views/FormConstructorView.vue")
   },
   {
-    path: '/form-constructor/:id',
-    name: 'edit form',
+    path: '/forms/editor/:id',
+    name: 'edit',
     component: () => import("../views/FormConstructorView.vue")
   }
 ];

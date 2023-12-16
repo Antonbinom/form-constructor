@@ -1,7 +1,7 @@
 <template lang="pug">
 .forms
   Sidebar.forms-side
-    router-link.forms-side__back(to="/forms") Назад
+    span.forms-side__back(@click="$router.go(-1)") Назад
 
     ul.forms-menu
       li.forms-menu__item(
@@ -26,7 +26,33 @@
       h1.h1 Поля
     .constructor-fields
       h2.constructor-title.h2 Скрытые поля
-      BigBtn(name="Добавить поле")
+      .constructor-fields__item(
+        v-for="(field, index) in form.hiddenFields"
+        :key="field.id"
+        )
+        .constructor-fields-header
+          span {{ 'Инпут' }}
+          Button(
+            name="Удалить поле"
+            type="borderless"
+            @action="removeField('hiddenFields', field.id)"
+            )
+        Input.constructor-fields__input(
+          :input-value="field.value"
+          placeholder="Название для поля"
+          type="text"
+          @updateInput="form.hiddenFields[index].placeholder = $event"
+        )
+        .constructor-fields__required
+          Checkbox(
+            :isChecked="field.required"
+            @checkbox-change="field.required = !field.required"
+            )
+          span Сделать поле обязательным
+      BigBtn(
+        @action="addField('hiddenFields')"
+        name="Добавить поле"
+        )
     .constructor-fields
       h2.constructor-title.h2 Поля
       .constructor-fields__item(
@@ -52,10 +78,10 @@
             @checkbox-change="field.required = !field.required"
             )
           span Сделать поле обязательным
-    BigBtn(
-        @action="addField"
-        name="Добавить поле"
-        )
+      BigBtn(
+          @action="addField('fields')"
+          name="Добавить поле"
+          )
     .constructor-fields
       h2.constructor-title.h2 Чекбоксы
       .constructor-fields__item(
@@ -81,11 +107,11 @@
             @checkbox-change="checkbox.required = !checkbox.required"
             )
           span Сделать чекбокс обязательным
-    BigBtn(
-      @action="addCheckbox"
-      name="Добавить чекбокс"
-      )
-    .constructor-selects
+      BigBtn(
+        @action="addCheckbox"
+        name="Добавить чекбокс"
+        )
+    .constructor-fields.constructor-selects
       h2.constructor-title.h2 Списки
       .constructor-fields__item(
         v-for="(select, index) in form.selects"
@@ -127,11 +153,24 @@
             @checkbox-change="select.required = !select.required"
             )
           span Сделать список обязательным
-    BigBtn(
-      @action="addSelect"
-      name="Добавить список"
-      )
+      BigBtn(
+        @action="addSelect"
+        name="Добавить список"
+        )
 
+    BigBtn(
+          v-if="!form.page"
+          name="Добавить страницу формы"
+          type="secondary"
+          @action="addFormPage()"
+          )
+    BigBtn(
+          v-if="form.page"
+          name="Перейти на страницу формы"
+          type="secondary"
+          :icon="false"
+          @action="toFormPage()"
+          )
   .preview
     .preview-wrapper
       h2.h2.preview-title {{ form.name }}
@@ -166,14 +205,14 @@
 </template>
 
 // <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import Sidebar from "@/components/layouts/SidebarComponent.vue";
 import Button from "@/components/ButtonComponent.vue";
 import BigBtn from "@/components/BigBtnComponent.vue";
 import Input from "@/components/InputComponent.vue";
 import Checkbox from "@/components/CheckboxComponent.vue";
 import Select from "@/components/SelectComponent.vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 // Methods
 import generateUniqueId from '@/methods/generateUniqueId.js'
@@ -181,8 +220,10 @@ import generateUniqueId from '@/methods/generateUniqueId.js'
 // Store
 import { useStore } from "vuex";
 //
-const store = useStore();
+const store = useStore()
 const route = useRoute()
+const router= useRouter()
+
 const menuItems = ref([
   { name: "Тип формы", isActive: false },
   { name: "Сущности",  isActive: false },
@@ -191,24 +232,23 @@ const menuItems = ref([
   { name: "Другие настройки",  isActive: false },
 ]);
 
-const form = ref({});
+const form = ref({})
+const isFormSaved = ref(false)
 
-const addField = () => {
-  const id = generateUniqueId('fd')
+const addField = (type) => {
   const newField = {
-    id,
+    id: generateUniqueId('fd'),
     value: "",
     placeholder: 'Название для поля',
     type: 'text',
     required: false
   };
-  form.value.fields.push(newField)
+  form.value[type].push(newField)
 }
 
 const addSelect = () => {
-  const id = generateUniqueId('sct')
   const newSelect = {
-    id,
+    id: generateUniqueId('sct'),
     name: 'Новый список',
     options: [
       {
@@ -225,10 +265,9 @@ const addSelect = () => {
 }
 
 const addCheckbox = () => {
-  const id = generateUniqueId('cb');
   const newCheckbox =
     {
-    id,
+    id: generateUniqueId('cb'),
     isChecked: false,
     required: false,
     text: ''
@@ -237,10 +276,9 @@ const addCheckbox = () => {
 }
 
 const addOption = (index) => {
-  const id = generateUniqueId('op');
   const newOption =
     {
-    id,
+    id: generateUniqueId('op'),
     value: "",
     name: "",
     selected: false,
@@ -258,11 +296,18 @@ const removeOption = (index, id) => {
 }
 
 const saveForm = () => {
-  const {fields, checkboxes, selects} = form.value
-  if(fields.length || checkboxes.length || selects.length) {
-    store.dispatch('addNewForm', form.value)
-  }
-  return
+ if(checkFieldsExist()) {
+  store.dispatch('addNewForm', form.value)
+  isFormSaved.value = true
+ }
+}
+
+const addFormPage = () => {
+  form.value.page = `/forms/${form.value.id}`
+}
+
+const toFormPage = () => {
+    isFormSaved.value && router.push(form.value.page)
 }
 
 const switchMenu = (index) => {
@@ -272,10 +317,16 @@ const switchMenu = (index) => {
   menuItems.value[index].isActive = true
 }
 
+const checkFieldsExist = () => {
+  const {fields, checkboxes, selects, hiddenFields} = form.value
+  return (hiddenFields.length || fields.length || checkboxes.length || selects.length)
+}
+
 onMounted(() => {
   if(route.params.id) {
     store.dispatch('setCurrentFormId', route.params.id)
     form.value = store.getters.getCurrentForm
+    isFormSaved.value = true
   } else {
     form.value = {
     id: generateUniqueId('fm'),
@@ -284,7 +335,9 @@ onMounted(() => {
     created: new Date().toLocaleDateString('en-EN').replace(/\//g,'.'),
     fields: [],
     checkboxes: [],
-    selects: []
+    selects: [],
+    hiddenFields: [],
+    page: ''
   }
   }
 })
@@ -295,6 +348,7 @@ onMounted(() => {
   &-side {
     &__back {
       margin-bottom: 56px;
+      cursor: pointer;
       &::before {
       content: url('@/assets/img/arrow-left.svg');
       display: inline-block;

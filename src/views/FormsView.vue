@@ -20,7 +20,7 @@
       h1.h1 Формы
       Button(
         name="Создать форму"
-        @action="$router.push('form-constructor')"
+        @action="$router.push('forms/constructor')"
         )
     FormsList
 </template>

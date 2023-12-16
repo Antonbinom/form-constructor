@@ -1,7 +1,7 @@
 <template lang="pug">
 .form-preview
   Sidebar.forms-side
-      router-link.forms-side__back(to="/forms") Назад к списку форм
+      span.forms-side__back(@click="$router.go(-1)") Назад к списку форм
 
   .preview
     .preview-wrapper(v-if="form")
